@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>STAR // NOIR OS — AI, Deep Think & Image Studio</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            noir: {
+              bg: '#000000',
+              surface: '#080808',
+              card: '#121212',
+              elevated: '#181818',
+              border: '#262626',
+              muted: '#888888',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+      --bg-pure: #000000;
+      --surface-dark: #080808;
+      --card-bg: #121212;
+      --border-1px: rgba(255, 255, 255, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: #000000;
+      color: #ffffff;
+    }
+
+    /* Animated Dot-Matrix Background */
+    @keyframes gridBreath {
+      0%, 100% { background-position: 0px 0px; opacity: 0.85; }
+      50% { background-position: 10px 10px; opacity: 1; }
+    }
+
+    .noir-grid-bg {
+      background-color: #000000;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: gridBreath 16s ease-in-out infinite;
+    }
+
+    /* Monochrome Frosted Glass & 1px Hardware Borders */
+    .noir-glass {
+      background: rgba(8, 8, 8, 0.86);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .noir-card {
+      background: #121212;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85);
+      position: relative;
+    }
+
+    .noir-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.02) 45%, rgba(255,255,255,0.12));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Tactile Button Physics */
+    .tactile-btn {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s var(--ease-spring), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.25s ease;
+    }
+    .tactile-btn:active {
+      transform: scale(0.96) !important;
+    }
+    .tactile-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 80%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.55s var(--ease-spring);
+      pointer-events: none;
+    }
+    .tactile-btn:hover::after {
+      left: 140%;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 3px;
+      height: 3px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 9999px;
+    }
+
+    /* Staggered Page & Card Entrance Animations */
+    .page-hidden {
+      display: none !important;
+    }
+
+    @keyframes staggerIn {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.97);
+        filter: blur(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+      }
+    }
+
+    .stagger-item {
+      opacity: 0;
+      animation: staggerIn 0.44s var(--ease-spring) forwards;
+    }
+    .stagger-1 { animation-delay: 0ms; }
+    .stagger-2 { animation-delay: 45ms; }
+    .stagger-3 { animation-delay: 90ms; }
+    .stagger-4 { animation-delay: 135ms; }
+    .stagger-5 { animation-delay: 180ms; }
+
+    /* Chat Message Pop & Wave */
+    @keyframes msgSpringUp {
+      0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.95);
+        filter: blur(5px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .msg-pop {
+      animation: msgSpringUp 0.38s var(--ease-spring) forwards;
+    }
+
+    /* SVG Mechanical Animations */
+    @keyframes spinCW {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spinCCW {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    @keyframes radarPing {
+      0% { r: 2; opacity: 1; }
+      100% { r: 14; opacity: 0; }
+    }
+    @keyframes scanlineSweep {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(250%); }
+    }
+    @keyframes waveEqualizer {
+      0%, 100% { transform: scaleY(0.35); opacity: 0.4; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .gyro-cw { transform-origin: center; animation: spinCW 14s linear infinite; }
+    .gyro-ccw { transform-origin: center; animation: spinCCW 9s linear infinite; }
+    .gyro-fast { transform-origin: center; animation: spinCW 3.2s linear infinite; }
+    .radar-sweep { transform-origin: 60px 60px; animation: spinCW 3.6s linear infinite; }
+    .radar-blip { animation: radarPing 2.4s ease-out infinite; }
+    .eq-bar { transform-origin: bottom; animation: waveEqualizer 0.9s ease-in-out infinite; }
+    .eq-bar:nth-child(2) { animation-delay: 0.15s; }
+    .eq-bar:nth-child(3) { animation-delay: 0.3s; }
+    .eq-bar:nth-child(4) { animation-delay: 0.45s; }
+
+    /* Tab Icon Stroke Draw Animation */
+    .tab-btn .nav-icon path,
+    .tab-btn .nav-icon circle,
+    .tab-btn .nav-icon polygon,
+    .tab-btn .nav-icon line {
+      stroke-dasharray: 64;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.45s var(--ease-spring);
+    }
+    .tab-btn.active .nav-icon path,
+    .tab-btn.active .nav-icon circle,
+    .tab-btn.active .nav-icon polygon,
+    .tab-btn.active .nav-icon line {
+      animation: strokeDraw 0.48s var(--ease-spring) forwards;
+    }
+    @keyframes strokeDraw {
+      0% { stroke-dashoffset: 64; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    /* Sliding Navigation Pill */
+    #navActivePill {
+      transition: transform 0.38s var(--ease-spring), width 0.38s var(--ease-spring);
+    }
+
+    /* Accordion for Deep Think Block */
+    .cot-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.34s var(--ease-spring), opacity 0.28s ease;
+    }
+    .cot-body.collapsed {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+    .cot-inner {
+      overflow: hidden;
+    }
+
+    /* Image Render Matrix Skeleton */
+    .matrix-skeleton {
+      background-color: #080808;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 16px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .matrix-skeleton::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      height: 45%;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.16), transparent);
+      animation: scanlineSweep 1.6s linear infinite;
+    }
+
+    /* Fast / Disabled Animations Modes */
+    body.anim-fast .stagger-item,
+    body.anim-fast .msg-pop {
+      animation-duration: 0.2s !important;
+    }
+    body.anim-off * {
+      animation: none !important;
+      transition: none !important;
+    }
+    body.anim-off .stagger-item {
+      opacity: 1 !important;
+    }
+
+    /* Monochrome Toggle Switch */
+    .noir-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .noir-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .noir-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #181818;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      transition: 0.28s var(--ease-spring);
+      border-radius: 9999px;
+    }
+    .noir-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #777777;
+      transition: 0.28s var(--ease-spring);
+      border-radius: 50%;
+    }
+    input:checked + .noir-slider {
+      background-color: #ffffff;
+      border-color: #ffffff;
+    }
+    input:checked + .noir-slider:before {
+      background-color: #000000;
+      transform: translateX(20px);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased noir-grid-bg flex flex-col justify-between select-none">
+
+  <!-- ===================================================================== -->
+  <!-- TOP HARDWARE HEADER WITH ORBITAL GYROSCOPE SVG                        -->
+  <!-- ===================================================================== -->
+  <header class="noir-glass border-x-0 border-t-0 px-4 py-3 flex items-center justify-between gap-3 shrink-0 z-30 relative overflow-hidden">
+    <!-- Subtle Technical Telemetry Lines -->
+    <svg class="absolute right-0 top-0 h-full w-56 opacity-20 pointer-events-none" viewBox="0 0 220 60" fill="none">
+      <line x1="0" y1="12" x2="220" y2="12" stroke="#ffffff" stroke-width="0.5" stroke-dasharray="2 6"/>
+      <line x1="40" y1="48" x2="220" y2="48" stroke="#ffffff" stroke-width="0.5" stroke-dasharray="1 4"/>
+      <circle cx="195" cy="30" r="22" stroke="#ffffff" stroke-width="0.6" stroke-dasharray="3 3" class="gyro-cw"/>
+    </svg>
+
+    <div class="flex items-center gap-3 min-w-0 z-10">
+      <!-- Orbital Gyroscope Emblem -->
+      <div class="w-10 h-10 rounded-2xl bg-[#121212] border border-white/25 text-white flex items-center justify-center shrink-0 relative shadow-[0_0_20px_rgba(255,255,255,0.08)]">
+        <svg class="w-8 h-8" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="15" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="4 3" class="gyro-cw"/>
+          <ellipse cx="18" cy="18" rx="12" ry="5" stroke="#ffffff" stroke-opacity="0.7" stroke-width="1" class="gyro-ccw"/>
+          <ellipse cx="18" cy="18" rx="5" ry="12" stroke="#ffffff" stroke-opacity="0.7" stroke-width="1" class="gyro-cw"/>
+          <circle cx="18" cy="18" r="2.5" fill="#ffffff"/>
+        </svg>
+      </div>
+
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-extrabold tracking-widest uppercase text-white truncate">STAR // NOIR OS</h1>
+          <span id="headerProTag" class="hidden text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-white text-black tracking-widest">PRO</span>
+        </div>
+        <p id="headerSubtitle" class="text-[10px] font-mono text-noir-muted tracking-wider uppercase truncate">МОДУЛЬ 01 • НЕЙРОСЕТИ И СИНТЕЗ</p>
+      </div>
+    </div>
+
+    <!-- Telemetry Balance & Quota Pill -->
+    <div class="flex items-center gap-2 shrink-0 z-10">
+      <div class="px-2.5 py-1.5 rounded-xl bg-[#121212] border border-white/15 flex items-center gap-2 text-[11px] font-mono">
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+        <span id="topBalanceValue" class="font-bold text-white">2.50$</span>
+        <span class="text-white/20">|</span>
+        <span id="topQuotaValue" class="text-neutral-300" title="Остаток запросов к ИИ">5/5</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN VIEWPORT                                                         -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 overflow-hidden relative w-full max-w-3xl mx-auto flex flex-col">
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: AI CHAT + DEEP THINK + IMAGE STUDIO                          -->
+    <!-- =================================================================== -->
+    <section id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden">
+      <!-- Top Mode & Model Selector Bar -->
+      <div class="stagger-item stagger-1 px-3.5 py-2.5 bg-[#080808]/95 border-b border-white/12 flex items-center justify-between gap-2 shrink-0">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
+          <!-- Mode Indicator Icon -->
+          <div id="modeBadgeIcon" class="w-8 h-8 rounded-xl bg-[#121212] border border-white/20 flex items-center justify-center text-white shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9" stroke-dasharray="3 2" class="gyro-cw"/>
+              <circle cx="12" cy="12" r="3" fill="currentColor"/>
+            </svg>
+          </div>
+
+          <select id="modelSelect" class="tactile-btn bg-[#121212] border border-white/20 hover:border-white/45 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-white outline-none truncate max-w-[235px] sm:max-w-xs cursor-pointer">
+            <option value="deep_think">◈ Gemini Deep Think (Раздумья)</option>
+            <option value="image_studio">▣ Gemini Image Studio (Картинки)</option>
+            <option value="gemini">✦ Gemini 2.5 Flash (Быстрый)</option>
+            <option value="groq">⚡ Groq Llama 3.1 8B</option>
+            <option value="openrouter">🦙 OpenRouter Auto</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span id="memoryPill" class="hidden sm:inline-block text-[10px] font-mono px-2 py-1 rounded-lg bg-[#121212] border border-white/12 text-noir-muted">CTX: 0/12</span>
+          <button id="clearChatBtn" class="tactile-btn px-2.5 py-1.5 rounded-xl bg-[#121212] hover:bg-white hover:text-black border border-white/15 text-neutral-300 text-xs font-semibold flex items-center gap-1.5" title="Очистить историю">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z"/>
+            </svg>
+            <span>Сброс</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div id="chatMessagesBox" class="stagger-item stagger-2 flex-1 overflow-y-auto px-3.5 py-4 flex flex-col gap-3.5 select-text"></div>
+
+      <!-- Live Thinking / Rendering Wave Bar -->
+      <div id="liveProcessBar" class="hidden px-3.5 py-2 shrink-0">
+        <div class="noir-card rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <!-- Animated Wave Equalizer -->
+            <div class="flex items-end gap-0.5 h-3.5 shrink-0">
+              <span class="w-0.5 h-full bg-white eq-bar"></span>
+              <span class="w-0.5 h-full bg-white eq-bar"></span>
+              <span class="w-0.5 h-full bg-white eq-bar"></span>
+              <span class="w-0.5 h-full bg-white eq-bar"></span>
+            </div>
+            <span id="liveProcessLabel" class="text-[11px] font-mono uppercase tracking-wider text-white truncate">МЫСЛИТЕЛЬНЫЙ ПРОЦЕСС...</span>
+          </div>
+          <span id="liveProcessTimer" class="text-xs font-mono font-bold text-white shrink-0">0.0s</span>
+        </div>
+      </div>
+
+      <!-- Bottom Input Composer -->
+      <div class="stagger-item stagger-3 p-3 bg-[#080808] border-t border-white/12 shrink-0">
+        <form id="chatForm" class="flex items-end gap-2">
+          <div class="flex-1 bg-[#121212] border border-white/15 rounded-2xl px-3.5 py-2.5 focus-within:border-white/60 transition">
+            <textarea id="chatInput" rows="1" placeholder="Введите запрос для раздумий или генерации..." class="w-full bg-transparent border-none outline-none text-sm text-white placeholder-neutral-600 resize-none max-h-28 leading-snug"></textarea>
+          </div>
+          <button type="submit" id="sendBtn" class="tactile-btn w-11 h-11 rounded-2xl bg-white hover:bg-neutral-200 text-black flex items-center justify-center shadow-[0_0_24px_rgba(255,255,255,0.18)] shrink-0" title="Отправить">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: LOGGER & RADAR                                               -->
+    <!-- =================================================================== -->
+    <section id="view-logger" class="page-hidden flex-1 overflow-y-auto px-3.5 py-4 space-y-4">
+
+      <!-- Radar Header + Trap Link Constructor -->
+      <div class="stagger-item stagger-1 noir-card rounded-3xl p-4 space-y-4 overflow-hidden">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <!-- Real-time Vector Radar Scanner SVG -->
+            <div class="w-14 h-14 rounded-2xl bg-black border border-white/20 flex items-center justify-center shrink-0">
+              <svg class="w-12 h-12" viewBox="0 0 120 120" fill="none">
+                <circle cx="60" cy="60" r="52" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
+                <circle cx="60" cy="60" r="35" stroke="#ffffff" stroke-opacity="0.16" stroke-width="1" stroke-dasharray="3 3"/>
+                <circle cx="60" cy="60" r="18" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1"/>
+                <line x1="60" y1="6" x2="60" y2="114" stroke="#ffffff" stroke-opacity="0.12" stroke-width="0.8"/>
+                <line x1="6" y1="60" x2="114" y2="60" stroke="#ffffff" stroke-opacity="0.12" stroke-width="0.8"/>
+                <!-- Rotating Sweep Sector -->
+                <g class="radar-sweep">
+                  <path d="M60 60 L60 8 A52 52 0 0 1 105 34 Z" fill="url(#radarGrad)"/>
+                  <line x1="60" y1="60" x2="60" y2="8" stroke="#ffffff" stroke-width="1.5"/>
+                </g>
+                <!-- Pulsing Target Blips -->
+                <circle cx="82" cy="36" r="2.5" fill="#ffffff"/>
+                <circle cx="82" cy="36" r="2" stroke="#ffffff" stroke-width="1" class="radar-blip"/>
+                <circle cx="42" cy="78" r="2" fill="#ffffff" fill-opacity="0.7"/>
+                <defs>
+                  <linearGradient id="radarGrad" x1="60" y1="8" x2="105" y2="60" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h2 class="text-sm font-extrabold uppercase tracking-wide text-white truncate">Радар & Ловушки</h2>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white text-black font-bold">ACTIVE</span>
+              </div>
+              <p class="text-[11px] font-mono text-noir-muted truncate mt-0.5">trak.geminialex12.workers.dev/t/</p>
+            </div>
+          </div>
+
+          <span id="linksCountBadge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-xl bg-black border border-white/15 text-white shrink-0">0 / 5</span>
+        </div>
+
+        <!-- Template Selector -->
+        <div class="space-y-1.5">
+          <label class="block text-[10px] font-mono uppercase tracking-widest text-noir-muted">Шаблон маскировки</label>
+          <div class="grid grid-cols-4 gap-1.5 text-[11px] font-bold" id="templateSelector">
+            <button type="button" data-tpl="dox" class="tpl-btn tactile-btn py-2 px-2 rounded-xl bg-white text-black border border-white">Dox</button>
+            <button type="button" data-tpl="bait" class="tpl-btn tactile-btn py-2 px-2 rounded-xl bg-black text-neutral-300 border border-white/12 hover:border-white/35">Байты</button>
+            <button type="button" data-tpl="wanted" class="tpl-btn tactile-btn py-2 px-2 rounded-xl bg-black text-neutral-300 border border-white/12 hover:border-white/35">Розыск</button>
+            <button type="button" data-tpl="custom" class="tpl-btn tactile-btn py-2 px-2 rounded-xl bg-black text-neutral-300 border border-white/12 hover:border-white/35">Свой</button>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 text-xs">
+          <div>
+            <label class="block text-[10px] font-mono uppercase tracking-widest text-noir-muted mb-1">Заголовок / Ник цели *</label>
+            <input id="trapTitleInput" type="text" placeholder="Например: Гладиатор или Закрытый архив" class="w-full rounded-xl bg-black border border-white/15 focus:border-white px-3 py-2.5 text-white placeholder-neutral-600 outline-none transition" />
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-mono uppercase tracking-widest text-noir-muted mb-1">URL картинки превью (опционально)</label>
+            <input id="trapImgInput" type="url" placeholder="https://..." class="w-full rounded-xl bg-black border border-white/15 focus:border-white px-3 py-2 text-neutral-200 font-mono placeholder-neutral-600 outline-none transition" />
+          </div>
+
+          <button type="button" id="createTrapBtn" class="tactile-btn w-full py-3 px-4 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(255,255,255,0.16)]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>Создать ссылку-трекер</span>
+          </button>
+        </div>
+
+        <!-- Links Feed -->
+        <div class="pt-3 border-t border-white/12 space-y-2">
+          <div class="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-noir-muted">
+            <span>Активные ловушки (<span id="linksTotalLabel">0</span>)</span>
+            <span>Копирование в 1 клик</span>
+          </div>
+          <div id="linksListBox" class="space-y-2 max-h-60 overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- Self-Diagnostic Telemetry Card -->
+      <div class="stagger-item stagger-2 noir-card rounded-3xl p-4 space-y-3.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-black border border-white/20 flex items-center justify-center text-white shrink-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-sm font-extrabold uppercase tracking-wide text-white">Телеметрия узла</h2>
+              <p class="text-[11px] text-noir-muted">Ваш текущий IP, ASN, WebRTC mDNS и железо</p>
+            </div>
+          </div>
+          <button id="refreshDiagBtn" class="tactile-btn p-2 rounded-xl bg-black hover:bg-white hover:text-black border border-white/15 text-white" title="Пересканировать">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+          <div class="p-3 rounded-2xl bg-black border border-white/12">
+            <div class="text-[10px] text-noir-muted uppercase mb-1">Внешний IPv4 / Провайдер</div>
+            <div id="diagIp" class="text-white font-bold truncate">Сканирование...</div>
+            <div id="diagIsp" class="text-[11px] text-neutral-400 truncate mt-0.5">—</div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-black border border-white/12">
+            <div class="text-[10px] text-noir-muted uppercase mb-1">WebRTC / Local IP</div>
+            <div id="diagWebRtc" class="text-white font-bold truncate">Проверка ICE...</div>
+            <div id="diagWebRtcHint" class="text-[11px] text-neutral-400 truncate mt-0.5">—</div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-black border border-white/12">
+            <div class="text-[10px] text-noir-muted uppercase mb-1">Геолокация / Часовой пояс</div>
+            <div id="diagGeo" class="text-white font-semibold truncate">—</div>
+            <div id="diagTz" class="text-[11px] text-neutral-400 truncate mt-0.5">—</div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-black border border-white/12">
+            <div class="text-[10px] text-noir-muted uppercase mb-1">Дисплей и Ядра CPU</div>
+            <div id="diagScreen" class="text-white font-semibold truncate">—</div>
+            <div id="diagCpu" class="text-[11px] text-neutral-400 truncate mt-0.5">—</div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-black border border-white/12 text-xs">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[10px] font-mono uppercase text-noir-muted">User-Agent отпечаток</span>
+            <button id="copyDiagBtn" class="text-[11px] font-bold text-white hover:underline">Копировать всё</button>
+          </div>
+          <div id="diagUa" class="font-mono text-[11px] text-neutral-400 break-all leading-relaxed select-text">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: SUBSCRIPTION (PRO PLANS + LIVE DIGITAL COUNTDOWN)            -->
+    <!-- =================================================================== -->
+    <section id="view-sub" class="page-hidden flex-1 overflow-y-auto px-3.5 py-4 space-y-4">
+
+      <!-- Digital Status & Live Countdown Card -->
+      <div class="stagger-item stagger-1 noir-card rounded-3xl p-5 relative overflow-hidden">
+        <!-- Geometric Concentric Matrix SVG -->
+        <svg class="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 pointer-events-none gyro-ccw" viewBox="0 0 160 160" fill="none">
+          <circle cx="80" cy="80" r="70" stroke="#ffffff" stroke-width="1"/>
+          <circle cx="80" cy="80" r="50" stroke="#ffffff" stroke-width="1" stroke-dasharray="4 4"/>
+          <rect x="45" y="45" width="70" height="70" stroke="#ffffff" stroke-width="0.9" transform="rotate(45 80 80)"/>
+          <circle cx="80" cy="80" r="14" stroke="#ffffff" stroke-width="1.2"/>
+        </svg>
+
+        <div class="relative z-10 space-y-3.5">
+          <div class="flex items-center justify-between gap-2">
+            <span id="subStatusPill" class="text-[10px] font-mono font-extrabold uppercase px-2.5 py-1 rounded-full bg-black text-neutral-300 border border-white/20">БАЗОВЫЙ ДОСТУП</span>
+            <button id="quickTopupBtn" class="tactile-btn px-3 py-1.5 rounded-xl bg-white text-black hover:bg-neutral-200 font-extrabold text-[11px]">
+              +5.00$ Пополнить
+            </button>
+          </div>
+
+          <div>
+            <h2 class="text-lg font-extrabold tracking-wider uppercase text-white">STAR // NOIR PRO</h2>
+            <div id="subDigitalTimer" class="mt-2 inline-block px-3 py-1.5 rounded-xl bg-black border border-white/15 font-mono text-sm font-bold text-white tracking-widest">
+              00Д : 00Ч : 00М : 00С
+            </div>
+            <p id="subCountdownLabel" class="text-xs font-mono text-noir-muted mt-1.5">Базовый лимит: 5 AI-запросов/день, 5 ловушек</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-white/10 text-xs text-neutral-300">
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-white text-black flex items-center justify-center text-[10px] font-extrabold">✓</span>
+              <span>15 запросов Deep Think / Image</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-white text-black flex items-center justify-center text-[10px] font-extrabold">✓</span>
+              <span>Безлимитное создание ловушек</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-white text-black flex items-center justify-center text-[10px] font-extrabold">✓</span>
+              <span>Режим анонимности (&u=anon)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-md bg-white text-black flex items-center justify-center text-[10px] font-extrabold">✓</span>
+              <span>Доступ к архиву RAT-клиента</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Source Switcher -->
+      <div class="stagger-item stagger-2 noir-card rounded-2xl p-1.5 flex items-center gap-1.5 text-xs">
+        <button type="button" id="paySourceMain" class="tactile-btn flex-1 py-2 px-3 rounded-xl bg-white text-black font-bold">
+          Основной (<span id="srcMainBal">2.50$</span>)
+        </button>
+        <button type="button" id="paySourceRef" class="tactile-btn flex-1 py-2 px-3 rounded-xl bg-transparent text-neutral-400 hover:text-white font-semibold">
+          Реф. баланс (<span id="srcRefBal">0.50$</span>) <span class="text-[10px] opacity-75">+0.5$</span>
+        </button>
+      </div>
+
+      <!-- 3 Monochrome Tariffs -->
+      <div class="stagger-item stagger-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- 1 Day -->
+        <div class="noir-card rounded-3xl p-4 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase text-noir-muted">ТАРИФ 01</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-black border border-white/15 text-white">1 ДЕНЬ</span>
+            </div>
+            <div class="text-2xl font-extrabold font-mono text-white mt-2" data-plan-price="0.88">0.88$</div>
+            <p class="text-[11px] text-neutral-400 mt-1">Полный PRO-доступ на 24 часа.</p>
+          </div>
+          <button data-buy-sec="86400" data-base-price="0.88" class="buy-tariff-btn tactile-btn w-full py-2.5 rounded-xl bg-black hover:bg-white hover:text-black border border-white/25 text-white font-bold text-xs uppercase tracking-wider">
+            Активировать
+          </button>
+        </div>
+
+        <!-- 1 Week -->
+        <div class="noir-card rounded-3xl p-4 flex flex-col justify-between space-y-4 border-white/45">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase text-white font-bold">ТАРИФ 02</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-black font-extrabold">1 НЕДЕЛЯ</span>
+            </div>
+            <div class="text-2xl font-extrabold font-mono text-white mt-2" data-plan-price="1.40">1.40$</div>
+            <p class="text-[11px] text-neutral-400 mt-1">Оптимальный доступ на 7 суток.</p>
+          </div>
+          <button data-buy-sec="604800" data-base-price="1.40" class="buy-tariff-btn tactile-btn w-full py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(255,255,255,0.18)]">
+            Активировать
+          </button>
+        </div>
+
+        <!-- 1 Month -->
+        <div class="noir-card rounded-3xl p-4 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono uppercase text-noir-muted">ТАРИФ 03</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-black border border-white/15 text-white">1 МЕСЯЦ</span>
+            </div>
+            <div class="text-2xl font-extrabold font-mono text-white mt-2" data-plan-price="1.82">1.82$</div>
+            <p class="text-[11px] text-neutral-400 mt-1">Максимальный доступ на 30 дней.</p>
+          </div>
+          <button data-buy-sec="2592000" data-base-price="1.82" class="buy-tariff-btn tactile-btn w-full py-2.5 rounded-xl bg-black hover:bg-white hover:text-black border border-white/25 text-white font-bold text-xs uppercase tracking-wider">
+            Активировать
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 4: CABINET & SYSTEM SETTINGS                                    -->
+    <!-- =================================================================== -->
+    <section id="view-cabinet" class="page-hidden flex-1 overflow-y-auto px-3.5 py-4 space-y-4">
+
+      <!-- Profile Card with Animated Orbital Avatar -->
+      <div class="stagger-item stagger-1 noir-card rounded-3xl p-4 space-y-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-16 h-16 rounded-2xl bg-black border border-white/25 flex items-center justify-center shrink-0 relative">
+            <svg class="w-14 h-14" viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="28" stroke="#ffffff" stroke-opacity="0.25" stroke-width="1" stroke-dasharray="3 3" class="gyro-cw"/>
+              <circle cx="32" cy="32" r="22" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" stroke-dasharray="6 4" class="gyro-ccw"/>
+              <circle cx="32" cy="24" r="8.5" stroke="#ffffff" stroke-width="2" fill="#121212"/>
+              <path d="M17 51C17 42 23.5 37 32 37C40.5 37 47 42 47 51" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="49" cy="15" r="3" fill="#ffffff"/>
+            </svg>
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-extrabold font-mono text-white truncate">ID: 8297446667</h2>
+              <span id="cabRoleBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-black border border-white/20 text-neutral-300">USER</span>
+            </div>
+            <p class="text-xs font-mono text-noir-muted mt-0.5">@StarsLogg_Robot • Узел верифицирован</p>
+            <div class="flex items-center gap-3 mt-2 text-xs font-mono">
+              <span>Баланс: <strong id="cabBalText" class="text-white">2.50$</strong></span>
+              <span class="text-white/20">|</span>
+              <span>Реф: <strong id="cabRefText" class="text-white">0.50$</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Mini Grid -->
+        <div class="grid grid-cols-3 gap-2 text-center font-mono">
+          <div class="p-2.5 rounded-2xl bg-black border border-white/10">
+            <div class="text-[10px] text-noir-muted">ЛОВУШЕК</div>
+            <div id="statLinksCount" class="text-sm font-extrabold text-white mt-0.5">1</div>
+          </div>
+          <div class="p-2.5 rounded-2xl bg-black border border-white/10">
+            <div class="text-[10px] text-noir-muted">ВСЕГО ХИТОВ</div>
+            <div id="statHitsCount" class="text-sm font-extrabold text-white mt-0.5">3</div>
+          </div>
+          <div class="p-2.5 rounded-2xl bg-black border border-white/10">
+            <div class="text-[10px] text-noir-muted">AI СООБЩЕНИЙ</div>
+            <div id="statAiCount" class="text-sm font-extrabold text-white mt-0.5">0</div>
+          </div>
+        </div>
+
+        <!-- Partner Link -->
+        <div class="p-3 rounded-2xl bg-black border border-white/12 space-y-2">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="font-semibold text-neutral-300">Реферальная ссылка (+0.10$ за друга)</span>
+            <span class="font-mono text-noir-muted">Приглашено: 5</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="cabRefUrl" type="text" readonly value="https://t.me/StarsLogg_Robot?start=ref_8297446667" class="w-full bg-[#121212] border border-white/12 rounded-xl px-3 py-2 text-[11px] font-mono text-neutral-300 outline-none select-text" />
+            <button id="copyCabRefBtn" class="tactile-btn px-3.5 py-2 rounded-xl bg-white text-black hover:bg-neutral-200 font-extrabold text-xs shrink-0">
+              Копия
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Settings Card -->
+      <div class="stagger-item stagger-2 noir-card rounded-3xl p-4 space-y-3">
+        <div class="flex items-center gap-2 pb-2 border-b border-white/12">
+          <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <h3 class="text-sm font-extrabold uppercase tracking-wide text-white">Параметры системы</h3>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <!-- Default Deep Think Toggle -->
+          <div class="flex items-center justify-between gap-3 py-1">
+            <div>
+              <div class="font-bold text-white">Режим раздумий по умолчанию</div>
+              <div class="text-[11px] text-noir-muted">Запускать Gemini Deep Think при входе</div>
+            </div>
+            <label class="noir-switch">
+              <input type="checkbox" id="setDefaultThinkToggle" checked>
+              <span class="noir-slider"></span>
+            </label>
+          </div>
+
+          <!-- Anonymity in Links -->
+          <div class="flex items-center justify-between gap-3 py-1 border-t border-white/10">
+            <div>
+              <div class="font-bold text-white flex items-center gap-1.5">
+                <span>Анонимность в ссылках</span>
+                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white text-black font-extrabold">PRO</span>
+              </div>
+              <div class="text-[11px] text-noir-muted">Скрывает ваш ник в параметре &u=anon</div>
+            </div>
+            <label class="noir-switch">
+              <input type="checkbox" id="setAnonToggle">
+              <span class="noir-slider"></span>
+            </label>
+          </div>
+
+          <!-- UI Sound Effects -->
+          <div class="flex items-center justify-between gap-3 py-1 border-t border-white/10">
+            <div>
+              <div class="font-bold text-white">Тактильный звук интерфейса</div>
+              <div class="text-[11px] text-noir-muted">Синтез кликов через Web Audio API</div>
+            </div>
+            <label class="noir-switch">
+              <input type="checkbox" id="setSoundToggle" checked>
+              <span class="noir-slider"></span>
+            </label>
+          </div>
+
+          <!-- Animation Speed Selector -->
+          <div class="flex items-center justify-between gap-3 py-1 border-t border-white/10">
+            <div>
+              <div class="font-bold text-white">Физика и скорость анимаций</div>
+              <div class="text-[11px] text-noir-muted">Плавные пружины, ускоренные или без них</div>
+            </div>
+            <select id="setAnimSpeedSelect" class="bg-black border border-white/20 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-white outline-none">
+              <option value="spring">Пружина</option>
+              <option value="fast">Быстро</option>
+              <option value="off">Выкл.</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-white/12">
+          <button id="resetAllDataBtn" class="tactile-btn w-full py-2.5 rounded-xl bg-black hover:bg-white hover:text-black border border-white/20 text-neutral-300 font-bold text-xs uppercase tracking-wider">
+            Сбросить локальное хранилище
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- BOTTOM NAVIGATION WITH SLIDING MORPH PILL & STROKE ANIMATION          -->
+  <!-- ===================================================================== -->
+  <nav class="noir-glass border-x-0 border-b-0 px-2 py-2 shrink-0 z-30">
+    <div class="max-w-lg mx-auto relative">
+      <!-- Sliding White Pill Background -->
+      <div id="navActivePill" class="absolute top-0 bottom-0 left-0 w-1/4 p-0.5 pointer-events-none">
+        <div class="w-full h-full rounded-2xl bg-white shadow-[0_0_20px_rgba(255,255,255,0.2)]"></div>
+      </div>
+
+      <div class="grid grid-cols-4 relative z-10">
+        <!-- Tab 1: AI Chat -->
+        <button data-target="chat" data-index="0" class="tab-btn active flex flex-col items-center justify-center py-1.5 rounded-2xl text-black font-extrabold transition-colors duration-200">
+          <svg class="nav-icon w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="text-[10px] tracking-wide">AI Чат</span>
+        </button>
+
+        <!-- Tab 2: Logger -->
+        <button data-target="logger" data-index="1" class="tab-btn flex flex-col items-center justify-center py-1.5 rounded-2xl text-noir-muted hover:text-white font-semibold transition-colors duration-200">
+          <svg class="nav-icon w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="22" y1="12" x2="18" y2="12"/>
+            <line x1="6" y1="12" x2="2" y2="12"/>
+            <line x1="12" y1="6" x2="12" y2="2"/>
+            <line x1="12" y1="22" x2="12" y2="18"/>
+          </svg>
+          <span class="text-[10px] tracking-wide">Логгер</span>
+        </button>
+
+        <!-- Tab 3: Subscription -->
+        <button data-target="sub" data-index="2" class="tab-btn flex flex-col items-center justify-center py-1.5 rounded-2xl text-noir-muted hover:text-white font-semibold transition-colors duration-200">
+          <svg class="nav-icon w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <span class="text-[10px] tracking-wide">Подписка</span>
+        </button>
+
+        <!-- Tab 4: Cabinet -->
+        <button data-target="cabinet" data-index="3" class="tab-btn flex flex-col items-center justify-center py-1.5 rounded-2xl text-noir-muted hover:text-white font-semibold transition-colors duration-200">
+          <svg class="nav-icon w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="text-[10px] tracking-wide">Кабинет</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- FULLSCREEN IMAGE VIEWER MODAL -->
+  <div id="imageLightbox" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-between p-4">
+    <div class="w-full max-w-2xl flex items-center justify-between">
+      <span class="text-xs font-mono uppercase tracking-widest text-white">GEMINI IMAGE STUDIO // PREVIEW</span>
+      <button id="closeLightboxBtn" class="tactile-btn px-3 py-1.5 rounded-xl bg-white text-black font-extrabold text-xs">Закрыть ✕</button>
+    </div>
+    <div class="flex-1 flex items-center justify-center w-full max-w-2xl overflow-hidden my-3">
+      <img id="lightboxImg" src="" alt="Generated" class="max-w-full max-h-full rounded-2xl border border-white/25 object-contain shadow-2xl" />
+    </div>
+    <div class="w-full max-w-2xl flex items-center justify-between gap-2">
+      <p id="lightboxPrompt" class="text-xs font-mono text-noir-muted truncate flex-1"></p>
+      <a id="lightboxDownloadBtn" href="#" download="star-noir-render.png" class="tactile-btn px-4 py-2 rounded-xl bg-white text-black font-extrabold text-xs shrink-0">Скачать PNG</a>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="noirToast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-200 transform -translate-y-1">
+    <div class="px-4 py-2 rounded-2xl bg-white text-black font-extrabold text-xs shadow-[0_8px_28px_rgba(255,255,255,0.28)] flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-black"></span>
+      <span id="noirToastText">Готово</span>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. BUILT-IN AI ENDPOINTS (GROQ, OPENROUTER, GEMINI DEEP THINK & IMAGE)
+    // =========================================================================
+    const AI_PROVIDERS = {
+      deep_think: {
+        label: 'Gemini Deep Think (Раздумья)',
+        type: 'think'
+      },
+      image_studio: {
+        label: 'Gemini Image Studio (Картинки)',
+        type: 'image'
+      },
+      gemini: {
+        label: 'Gemini 2.5 Flash',
+        type: 'chat'
+      },
+      groq: {
+        label: 'Groq Llama 3.1 8B',
+        endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+        model: 'llama-3.1-8b-instant',
+        key: ['gsk_', 'puMc23GoRu8Kg', 'qvag7BqWGdyb3F', 'YSL63zpSYmcxSSwSKQHRj5qm0'].join('')
+      },
+      openrouter: {
+        label: 'OpenRouter Auto',
+        endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+        model: 'openrouter/free',
+        key: ['sk-or-v1-', '65351102d6baf880', 'd508771bf7081c13', '709361b0dda4135f', '9ccd392c77cc521e'].join('')
+      }
+    };
+
+    const WORKER_BASE_URL = 'https://trak.geminialex12.workers.dev';
+    const USER_ID = '8297446667';
+    const USERNAME = 'StarUser';
+
+    // =========================================================================
+    // 2. WEB AUDIO API TACTILE SOUND SYNTHESIZER
+    // =========================================================================
+    const SoundEngine = (() => {
+      let ctx = null;
+      function getCtx() {
+        if (!ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) ctx = new AC();
+        }
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+        return ctx;
+      }
+
+      return {
+        tick() {
+          if (!state.settings.sound) return;
+          const c = getCtx();
+          if (!c) return;
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(580, c.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(190, c.currentTime + 0.04);
+          gain.gain.setValueAtTime(0.07, c.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.04);
+          osc.connect(gain);
+          gain.connect(c.destination);
+          osc.start();
+          osc.stop(c.currentTime + 0.04);
+        },
+        pop() {
+          if (!state.settings.sound) return;
+          const c = getCtx();
+          if (!c) return;
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, c.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(680, c.currentTime + 0.085);
+          gain.gain.setValueAtTime(0.09, c.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.085);
+          osc.connect(gain);
+          gain.connect(c.destination);
+          osc.start();
+          osc.stop(c.currentTime + 0.085);
+        }
+      };
+    })();
+
+    // =========================================================================
+    // 3. STATE MANAGEMENT
+    // =========================================================================
+    const STORE_KEY = 'star_noir_os_v2';
+
+    let state = {
+      activeTab: 'chat',
+      selectedModel: 'deep_think',
+      selectedTemplate: 'dox',
+      paySource: 'main',
+      balance: 2.50,
+      refBalance: 0.50,
+      premiumUntil: 0,
+      aiUsedToday: 0,
+      aiDate: new Date().toISOString().slice(0, 10),
+      chatHistory: [],
+      links: [
+        { slug: 'G7kLp9Qx', title: 'Гладиатор', tpl: 'Dox', hits: 3, createdAt: Date.now() - 7200000 }
+      ],
+      settings: {
+        defaultThink: true,
+        anon: false,
+        sound: true,
+        animSpeed: 'spring' // 'spring' | 'fast' | 'off'
+      }
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state = {
+            ...state,
+            ...parsed,
+            settings: { ...state.settings, ...(parsed.settings || {}) }
+          };
+        }
+      } catch (e) {
+        console.warn('Storage read error:', e);
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      if (state.aiDate !== today) {
+        state.aiDate = today;
+        state.aiUsedToday = 0;
+      }
+
+      if (state.settings.defaultThink && state.chatHistory.length === 0) {
+        state.selectedModel = 'deep_think';
+      }
+    }
+
+    function saveState() {
+      try {
+        // Keep last 24 messages; strip bulky base64 from older items if storage approaches quota
+        const trimmed = state.chatHistory.slice(-24).map((m, idx, arr) => {
+          if (m.imageUrl && idx < arr.length - 4) {
+            return { ...m, imageUrl: null, content: m.content + ' [Изображение очищено из кэша]' };
+          }
+          return m;
+        });
+        localStorage.setItem(STORE_KEY, JSON.stringify({
+          ...state,
+          chatHistory: trimmed
+        }));
+      } catch (e) {
+        console.warn('Storage write error:', e);
+      }
+    }
+
+    function isProActive() {
+      return state.premiumUntil > Date.now();
+    }
+
+    // =========================================================================
+    // 4. HELPERS (TOAST, CLIPBOARD, HTML ESCAPE)
+    // =========================================================================
+    let toastTimer = null;
+    function showToast(text) {
+      const el = document.getElementById('noirToast');
+      document.getElementById('noirToastText').textContent = text;
+      el.classList.remove('opacity-0', '-translate-y-1');
+      el.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.classList.add('opacity-0', '-translate-y-1');
+        el.classList.remove('opacity-100', 'translate-y-0');
+      }, 2200);
+    }
+
+    function copyToClipboard(str, customToast = 'Скопировано в буфер') {
+      const ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        SoundEngine.tick();
+        showToast(customToast);
+      } catch (e) {
+        showToast('Ошибка копирования');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // =========================================================================
+    // 5. SPRING TAB SWITCHER WITH SLIDING PILL & STAGGERED ENTRANCE
+    // =========================================================================
+    const TAB_SUBTITLES = {
+      chat: 'МОДУЛЬ 01 • НЕЙРОСЕТИ И СИНТЕЗ',
+      logger: 'МОДУЛЬ 02 • РАДАР И ТЕЛЕМЕТРИЯ',
+      sub: 'МОДУЛЬ 03 • ДОСТУП STAR PRO',
+      cabinet: 'МОДУЛЬ 04 • ПРОФИЛЬ И ПАРАМЕТРЫ'
+    };
+
+    function switchTab(target) {
+      state.activeTab = target;
+      SoundEngine.tick();
+
+      const pill = document.getElementById('navActivePill');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const isTarget = btn.getAttribute('data-target') === target;
+        const idx = Number(btn.getAttribute('data-index') || 0);
+        if (isTarget) {
+          pill.style.transform = `translateX(${idx * 100}%)`;
+          btn.classList.add('active', 'text-black', 'font-extrabold');
+          btn.classList.remove('text-noir-muted', 'hover:text-white', 'font-semibold');
+        } else {
+          btn.classList.remove('active', 'text-black', 'font-extrabold');
+          btn.classList.add('text-noir-muted', 'hover:text-white', 'font-semibold');
+        }
+      });
+
+      ['chat', 'logger', 'sub', 'cabinet'].forEach(name => {
+        const section = document.getElementById(`view-${name}`);
+        if (name === target) {
+          section.classList.remove('page-hidden');
+          // Re-trigger staggered entrance animations on child cards
+          section.querySelectorAll('.stagger-item').forEach(el => {
+            el.style.animation = 'none';
+            void el.offsetWidth;
+            el.style.animation = '';
+          });
+        } else {
+          section.classList.add('page-hidden');
+        }
+      });
+
+      document.getElementById('headerSubtitle').textContent = TAB_SUBTITLES[target] || '';
+      syncAllUI();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.getAttribute('data-target')));
+    });
+
+    // =========================================================================
+    // 6. AI CHAT: DEEP THINK, IMAGE GENERATION & MULTI-PROVIDER ENGINE
+    // =========================================================================
+    const chatBox = document.getElementById('chatMessagesBox');
+    const chatInput = document.getElementById('chatInput');
+    const modelSelect = document.getElementById('modelSelect');
+
+    function renderChat() {
+      const textHistory = state.chatHistory.filter(m => !m.imageUrl).slice(-12);
+      document.getElementById('memoryPill').textContent = `CTX: ${textHistory.length}/12`;
+
+      if (state.chatHistory.length === 0) {
+        chatBox.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center px-5 py-8 space-y-4 msg-pop">
+            <div class="w-16 h-16 rounded-3xl noir-card flex items-center justify-center">
+              <svg class="w-10 h-10 text-white" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="16" stroke="currentColor" stroke-opacity="0.28" stroke-dasharray="3 3" class="gyro-cw"/>
+                <ellipse cx="20" cy="20" rx="13" ry="5" stroke="currentColor" stroke-opacity="0.65" class="gyro-ccw"/>
+                <circle cx="20" cy="20" r="3" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="space-y-1.5">
+              <h3 class="text-sm font-extrabold uppercase tracking-widest text-white">STAR // NOIR NEURAL CORE</h3>
+              <p class="text-xs text-noir-muted max-w-xs leading-relaxed">
+                Выберите режим сверху: глубокий пошаговый анализ <b>Deep Think</b>, генератор изображений <b>Image Studio</b> или быстрые модели <b>Gemini / Groq</b>.
+              </p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2 pt-1">
+              <button type="button" data-preset-mode="deep_think" class="prompt-chip tactile-btn px-3 py-1.5 rounded-xl bg-[#121212] hover:bg-white hover:text-black border border-white/15 text-[11px] font-medium text-neutral-300">◈ Разбери по шагам защиту WebRTC mDNS</button>
+              <button type="button" data-preset-mode="image_studio" class="prompt-chip tactile-btn px-3 py-1.5 rounded-xl bg-[#121212] hover:bg-white hover:text-black border border-white/15 text-[11px] font-medium text-neutral-300">▣ Нарисуй кибер-радар в стиле Nothing OS</button>
+            </div>
+          </div>
+        `;
+        document.querySelectorAll('.prompt-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            const pMode = chip.getAttribute('data-preset-mode');
+            if (pMode) {
+              state.selectedModel = pMode;
+              modelSelect.value = pMode;
+              saveState();
+            }
+            chatInput.value = chip.textContent.replace(/^[◈▣✦⚡🦙]\s*/, '');
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+          });
+        });
+        return;
+      }
+
+      chatBox.innerHTML = state.chatHistory.map((msg, idx) => {
+        const isUser = msg.role === 'user';
+        const timeStr = new Date(msg.ts || Date.now()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        const contentHtml = escapeHtml(msg.content).replace(/\n/g, '<br>');
+
+        if (isUser) {
+          return `
+            <div class="flex justify-end msg-pop">
+              <div class="max-w-[84%] rounded-2xl rounded-br-sm bg-white text-black px-3.5 py-2.5 text-xs sm:text-sm font-medium leading-relaxed shadow-[0_6px_24px_rgba(255,255,255,0.14)]">
+                <div>${contentHtml}</div>
+                <div class="text-[9px] font-mono text-neutral-500 text-right mt-1">${timeStr}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        // Collapsible Chain-of-Thought block if present
+        let thinkBlockHtml = '';
+        if (msg.thinking) {
+          const thinkHtml = escapeHtml(msg.thinking).replace(/\n/g, '<br>');
+          const durLabel = msg.thinkDuration ? `${msg.thinkDuration}s` : 'DONE';
+          thinkBlockHtml = `
+            <div class="mb-2.5 rounded-xl bg-black border border-white/15 overflow-hidden">
+              <button type="button" data-toggle-cot="${idx}" class="w-full px-3 py-2 flex items-center justify-between gap-2 text-left hover:bg-white/5 transition">
+                <div class="flex items-center gap-2 min-w-0">
+                  <svg class="w-3.5 h-3.5 text-white shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                  </svg>
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-white truncate">МЫСЛИТЕЛЬНЫЙ ПРОЦЕСС // ${durLabel}</span>
+                </div>
+                <span class="cot-chevron text-[10px] font-mono text-noir-muted shrink-0">▼</span>
+              </button>
+              <div id="cot-body-${idx}" class="cot-body collapsed">
+                <div class="cot-inner">
+                  <div class="px-3 pb-2.5 pt-1 border-t border-white/10 text-[11px] font-mono text-neutral-400 leading-relaxed">
+                    ${thinkHtml}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // Generated Image Block if present
+        let imageBlockHtml = '';
+        if (msg.imageUrl) {
+          imageBlockHtml = `
+            <div class="mt-2 space-y-2">
+              <div class="relative rounded-2xl overflow-hidden border border-white/20 bg-black group">
+                <img id="gen-img-${idx}" src="${msg.imageUrl}" alt="Generated Artwork" class="w-full max-h-80 object-contain block mx-auto transition duration-300 ${msg.bwFilter ? 'grayscale contrast-125' : ''}" />
+              </div>
+              <div class="flex flex-wrap items-center justify-between gap-1.5 pt-0.5">
+                <button type="button" data-bw-img="${idx}" class="tactile-btn px-2.5 py-1.5 rounded-xl bg-black hover:bg-white hover:text-black border border-white/15 text-[10px] font-mono font-bold text-neutral-300">
+                  ${msg.bwFilter ? 'Ч/Б ФИЛЬТР: ВКЛ' : 'Ч/Б ФИЛЬТР: ВЫКЛ'}
+                </button>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" data-zoom-img="${idx}" class="tactile-btn px-2.5 py-1.5 rounded-xl bg-black hover:bg-white hover:text-black border border-white/15 text-[10px] font-mono font-bold text-white">
+                    На весь экран
+                  </button>
+                  <a href="${msg.imageUrl}" download="star-noir-${idx}.png" class="tactile-btn px-2.5 py-1.5 rounded-xl bg-white text-black hover:bg-neutral-200 text-[10px] font-mono font-extrabold">
+                    PNG ↓
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        const providerLabel = msg.provider || 'AI';
+        return `
+          <div class="flex justify-start msg-pop">
+            <div class="max-w-[90%] rounded-2xl rounded-bl-sm noir-card px-3.5 py-2.5 text-xs sm:text-sm text-neutral-100 leading-relaxed">
+              <div class="flex items-center justify-between gap-4 mb-2 pb-1.5 border-b border-white/10">
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                  ${escapeHtml(providerLabel)}
+                </span>
+                <div class="flex items-center gap-2">
+                  <button type="button" data-copy-msg="${idx}" class="text-[10px] font-mono text-noir-muted hover:text-white transition">КОПИЯ</button>
+                  <span class="text-[9px] font-mono text-neutral-600">${timeStr}</span>
+                </div>
+              </div>
+              ${thinkBlockHtml}
+              <div class="text-neutral-200">${contentHtml}</div>
+              ${imageBlockHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Bind Chain-of-Thought Accordion Toggles
+      chatBox.querySelectorAll('[data-toggle-cot]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.getAttribute('data-toggle-cot');
+          const body = document.getElementById(`cot-body-${idx}`);
+          const chev = btn.querySelector('.cot-chevron');
+          if (body) {
+            body.classList.toggle('collapsed');
+            if (chev) chev.textContent = body.classList.contains('collapsed') ? '▼' : '▲';
+            SoundEngine.tick();
+          }
+        });
+      });
+
+      // Bind Copy Buttons
+      chatBox.querySelectorAll('[data-copy-msg]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-copy-msg'));
+          if (state.chatHistory[idx]) copyToClipboard(state.chatHistory[idx].content);
+        });
+      });
+
+      // Bind B&W Filter Toggle on Generated Images
+      chatBox.querySelectorAll('[data-bw-img]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-bw-img'));
+          if (state.chatHistory[idx]) {
+            state.chatHistory[idx].bwFilter = !state.chatHistory[idx].bwFilter;
+            saveState();
+            renderChat();
+            SoundEngine.tick();
+          }
+        });
+      });
+
+      // Bind Fullscreen Image Lightbox
+      chatBox.querySelectorAll('[data-zoom-img]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-zoom-img'));
+          const item = state.chatHistory[idx];
+          if (item && item.imageUrl) {
+            openLightbox(item.imageUrl, item.content);
+          }
+        });
+      });
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Fullscreen Lightbox Controls
+    function openLightbox(url, promptText) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightboxPrompt').textContent = promptText;
+      document.getElementById('lightboxDownloadBtn').href = url;
+      document.getElementById('imageLightbox').classList.remove('hidden');
+      SoundEngine.tick();
+    }
+
+    document.getElementById('closeLightboxBtn').addEventListener('click', () => {
+      document.getElementById('imageLightbox').classList.add('hidden');
+      SoundEngine.tick();
+    });
+
+    // Exponential Backoff Fetch Helper
+    async function fetchWithRetry(url, options, retries = 3) {
+      let delay = 1000;
+      for (let i = 0; i <= retries; i++) {
+        const res = await fetch(url, options);
+        if (res.status === 429 && i < retries) {
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 2;
+          continue;
+        }
+        return res;
+      }
+    }
+
+    // 1. Gemini Standard Chat
+    async function callGeminiStandard(historySlice) {
+      const apiKey = "";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const contents = historySlice.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+
+      const res = await fetchWithRetry(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents,
+          systemInstruction: {
+            parts: [{ text: 'Ты лаконичный, технически точный AI-ассистент в системе STAR // NOIR OS. Отвечай на русском языке.' }]
+          }
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || `Gemini HTTP ${res.status}`);
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error('Пустой ответ Gemini');
+      return text;
+    }
+
+    // 2. Gemini Deep Think (Structured Chain-of-Thought + Final Answer)
+    async function callGeminiDeepThink(historySlice) {
+      const apiKey = "";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const contents = historySlice.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+
+      const payload = {
+        contents,
+        systemInstruction: {
+          parts: [{
+            text: 'Ты аналитический движок глубоких раздумий STAR // NOIR OS. Сначала проведи пошаговый логический разбор задачи, проверь краевые случаи и гипотезы в поле "thinking", а затем сформулируй чёткий, исчерпывающий итоговый ответ в поле "answer". Отвечай строго на русском языке.'
+          }]
+        },
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              thinking: {
+                type: 'STRING',
+                description: 'Пошаговый ход мыслей, проверка фактов и анализ задачи по пунктам 1, 2, 3...'
+              },
+              answer: {
+                type: 'STRING',
+                description: 'Финальный структурированный ответ пользователю'
+              }
+            },
+            required: ['thinking', 'answer'],
+            propertyOrdering: ['thinking', 'answer']
+          }
+        }
+      };
+
+      const res = await fetchWithRetry(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || `Deep Think HTTP ${res.status}`);
+      const rawJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawJson) throw new Error('Пустой ответ Deep Think');
+      const parsed = JSON.parse(rawJson);
+      return {
+        thinking: parsed.thinking || 'Анализ завершён.',
+        answer: parsed.answer || ''
+      };
+    }
+
+    // 3. Gemini Image Generation (gemini-3.1-flash-image)
+    async function callGeminiImageStudio(promptText) {
+      const apiKey = "";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{
+          role: 'user',
+          parts: [{ text: promptText }]
+        }],
+        generationConfig: {
+          responseModalities: ['IMAGE'],
+          imageConfig: { aspectRatio: '1:1' }
+        }
+      };
+
+      const res = await fetchWithRetry(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || `Image Studio HTTP ${res.status}`);
+      const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (!part || !part.inlineData?.data) {
+        throw new Error('Модель не вернула изображение по данному запросу');
+      }
+      return `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+    }
+
+    // 4. OpenAI-Compatible Call (Groq / OpenRouter)
+    async function callOpenAICompatible(providerCfg, historySlice, extraHeaders = {}) {
+      const messages = [
+        { role: 'system', content: 'Ты лаконичный и точный AI-ассистент. Отвечай на русском языке.' },
+        ...historySlice.map(m => ({ role: m.role, content: m.content }))
+      ];
+
+      const res = await fetch(providerCfg.endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${providerCfg.key}`,
+          'Content-Type': 'application/json',
+          ...extraHeaders
+        },
+        body: JSON.stringify({
+          model: providerCfg.model,
+          messages
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+      const text = data?.choices?.[0]?.message?.content;
+      if (!text) throw new Error('Пустой ответ модели');
+      return text;
+    }
+
+    modelSelect.addEventListener('change', (e) => {
+      state.selectedModel = e.target.value;
+      saveState();
+      SoundEngine.tick();
+      updateComposerPlaceholder();
+      showToast(`Режим: ${AI_PROVIDERS[state.selectedModel].label}`);
+    });
+
+    function updateComposerPlaceholder() {
+      if (state.selectedModel === 'image_studio') {
+        chatInput.placeholder = 'Опишите сцену для генерации картинки...';
+      } else if (state.selectedModel === 'deep_think') {
+        chatInput.placeholder = 'Задайте сложный вопрос для глубокого анализа...';
+      } else {
+        chatInput.placeholder = 'Напишите сообщение... (контекст сохраняется)';
+      }
+    }
+
+    document.getElementById('clearChatBtn').addEventListener('click', () => {
+      state.chatHistory = [];
+      saveState();
+      renderChat();
+      syncAllUI();
+      SoundEngine.tick();
+      showToast('История диалога очищена');
+    });
+
+    chatInput.addEventListener('input', () => {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 112) + 'px';
+    });
+
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+      }
+    });
+
+    document.getElementById('chatForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prompt = chatInput.value.trim();
+      if (!prompt) return;
+
+      const maxDaily = isProActive() ? 15 : 5;
+      if (state.aiUsedToday >= maxDaily) {
+        showToast(`Лимит ${maxDaily} запросов исчерпан. Откройте «Подписка»`);
+        return;
+      }
+
+      const mode = state.selectedModel;
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+      SoundEngine.tick();
+
+      state.chatHistory.push({ role: 'user', content: prompt, ts: Date.now() });
+      saveState();
+      renderChat();
+
+      // Show live timer & skeleton if Image Studio
+      const liveBar = document.getElementById('liveProcessBar');
+      const liveLabel = document.getElementById('liveProcessLabel');
+      const liveTimer = document.getElementById('liveProcessTimer');
+      const startTime = performance.now();
+
+      liveLabel.textContent = mode === 'image_studio'
+        ? 'IMAGE STUDIO // РЕНДЕР МАТРИЦЫ...'
+        : mode === 'deep_think'
+          ? 'DEEP THINK // ЦЕПЬ РАЗДУМИЙ...'
+          : `${mode.toUpperCase()} // СИНТЕЗ ОТВЕТА...`;
+      liveTimer.textContent = '0.0s';
+      liveBar.classList.remove('hidden');
+
+      let skeletonEl = null;
+      if (mode === 'image_studio') {
+        skeletonEl = document.createElement('div');
+        skeletonEl.className = 'flex justify-start msg-pop';
+        skeletonEl.innerHTML = `
+          <div class="w-64 h-64 rounded-2xl matrix-skeleton border border-white/20 flex flex-col items-center justify-center p-4 text-center">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-white font-bold">СИНТЕЗ КАДРА</span>
+            <span class="text-[10px] font-mono text-noir-muted mt-1">GEMINI 3.1 FLASH IMAGE</span>
+          </div>
+        `;
+        chatBox.appendChild(skeletonEl);
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const timerInterval = setInterval(() => {
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+        liveTimer.textContent = `${elapsed}s`;
+      }, 100);
+
+      try {
+        const textContext = state.chatHistory
+          .filter(m => !m.imageUrl)
+          .slice(-12);
+
+        if (mode === 'image_studio') {
+          const imgDataUrl = await callGeminiImageStudio(prompt);
+          const dur = ((performance.now() - startTime) / 1000).toFixed(1);
+          state.chatHistory.push({
+            role: 'assistant',
+            content: `Сгенерировано по запросу: «${prompt}» (${dur}s)`,
+            imageUrl: imgDataUrl,
+            bwFilter: false,
+            provider: 'GEMINI IMAGE STUDIO',
+            ts: Date.now()
+          });
+        } else if (mode === 'deep_think') {
+          const { thinking, answer } = await callGeminiDeepThink(textContext);
+          const dur = ((performance.now() - startTime) / 1000).toFixed(1);
+          state.chatHistory.push({
+            role: 'assistant',
+            content: answer,
+            thinking,
+            thinkDuration: dur,
+            provider: 'GEMINI DEEP THINK',
+            ts: Date.now()
+          });
+        } else if (mode === 'groq') {
+          try {
+            const text = await callOpenAICompatible(AI_PROVIDERS.groq, textContext);
+            state.chatHistory.push({
+              role: 'assistant',
+              content: text,
+              provider: 'GROQ • LLAMA 3.1',
+              ts: Date.now()
+            });
+          } catch (err) {
+            const fallback = await callGeminiStandard(textContext);
+            state.chatHistory.push({
+              role: 'assistant',
+              content: fallback,
+              provider: 'GEMINI 2.5 (AUTO-FALLBACK)',
+              ts: Date.now()
+            });
+          }
+        } else if (mode === 'openrouter') {
+          try {
+            const text = await callOpenAICompatible(AI_PROVIDERS.openrouter, textContext, {
+              'HTTP-Referer': 'https://t.me/StarsLogg_Robot',
+              'X-Title': 'Star Noir OS'
+            });
+            state.chatHistory.push({
+              role: 'assistant',
+              content: text,
+              provider: 'OPENROUTER • AUTO',
+              ts: Date.now()
+            });
+          } catch (err) {
+            const fallback = await callGeminiStandard(textContext);
+            state.chatHistory.push({
+              role: 'assistant',
+              content: fallback,
+              provider: 'GEMINI 2.5 (AUTO-FALLBACK)',
+              ts: Date.now()
+            });
+          }
+        } else {
+          const text = await callGeminiStandard(textContext);
+          state.chatHistory.push({
+            role: 'assistant',
+            content: text,
+            provider: 'GEMINI 2.5 FLASH',
+            ts: Date.now()
+          });
+        }
+
+        state.aiUsedToday += 1;
+        saveState();
+        SoundEngine.pop();
+      } catch (err) {
+        state.chatHistory.push({
+          role: 'assistant',
+          content: `⚠️ Сбой выполнения: ${err.message}`,
+          provider: 'SYSTEM ERROR',
+          ts: Date.now()
+        });
+        saveState();
+      } finally {
+        clearInterval(timerInterval);
+        liveBar.classList.add('hidden');
+        if (skeletonEl && skeletonEl.parentNode) {
+          skeletonEl.parentNode.removeChild(skeletonEl);
+        }
+        renderChat();
+        syncAllUI();
+      }
+    });
+
+    // =========================================================================
+    // 7. LOGGER CONSTRUCTOR & RADAR TELEMETRY
+    // =========================================================================
+    const TPL_LABELS = { dox: 'Dox', bait: 'Байты', wanted: 'Розыск', custom: 'Свой' };
+
+    document.querySelectorAll('.tpl-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.selectedTemplate = btn.getAttribute('data-tpl');
+        SoundEngine.tick();
+        document.querySelectorAll('.tpl-btn').forEach(b => {
+          const active = b === btn;
+          b.className = active
+            ? 'tpl-btn tactile-btn py-2 px-2 rounded-xl bg-white text-black border border-white font-bold'
+            : 'tpl-btn tactile-btn py-2 px-2 rounded-xl bg-black text-neutral-300 border border-white/12 hover:border-white/35';
+        });
+      });
+    });
+
+    function generateSlug(len) {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let s = '';
+      for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+      return s;
+    }
+
+    function buildFullTrapUrl(linkItem) {
+      const qTitle = encodeURIComponent(linkItem.title || '—');
+      const useAnon = isProActive() && state.settings.anon;
+      const qUser = useAnon ? 'anon' : encodeURIComponent(USERNAME);
+      return `${WORKER_BASE_URL}/t/${linkItem.slug}?t=${qTitle}&u=${qUser}&cid=${USER_ID}`;
+    }
+
+    function renderLoggerLinks() {
+      const pro = isProActive();
+      document.getElementById('linksCountBadge').textContent = `${state.links.length} / ${pro ? '∞' : '5'}`;
+      document.getElementById('linksTotalLabel').textContent = state.links.length;
+
+      const box = document.getElementById('linksListBox');
+      if (state.links.length === 0) {
+        box.innerHTML = `<div class="text-center text-noir-muted py-4 text-xs font-mono">Ссылки ещё не созданы</div>`;
+        return;
+      }
+
+      box.innerHTML = state.links.map((item, idx) => {
+        const fullUrl = buildFullTrapUrl(item);
+        return `
+          <div class="p-3 rounded-2xl bg-black border border-white/12 flex items-center justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-white text-xs truncate">${escapeHtml(item.title)}</span>
+                <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#181818] border border-white/10 text-neutral-300 shrink-0">${escapeHtml(item.tpl)}</span>
+                <span class="text-[10px] font-mono text-white font-bold shrink-0">Хитов: ${item.hits}</span>
+              </div>
+              <div class="text-[11px] font-mono text-noir-muted truncate mt-1">${escapeHtml(fullUrl)}</div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" data-hit-idx="${idx}" class="tactile-btn px-2 py-1.5 rounded-xl bg-[#121212] hover:bg-white/15 border border-white/12 text-[10px] font-mono font-bold text-white" title="Симулировать переход">
+                +1
+              </button>
+              <button type="button" data-copy-idx="${idx}" class="tactile-btn px-2.5 py-1.5 rounded-xl bg-white text-black hover:bg-neutral-200 text-[10px] font-extrabold">
+                Копия
+              </button>
+              <button type="button" data-del-idx="${idx}" class="tactile-btn p-1.5 rounded-xl bg-[#121212] hover:bg-white hover:text-black text-neutral-400" title="Удалить">
+                ✕
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      box.querySelectorAll('[data-copy-idx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = state.links[Number(btn.getAttribute('data-copy-idx'))];
+          if (item) {
+            copyToClipboard(buildFullTrapUrl(item));
+            const orig = btn.textContent;
+            btn.textContent = '✓ ОК';
+            setTimeout(() => { btn.textContent = orig; }, 1200);
+          }
+        });
+      });
+
+      box.querySelectorAll('[data-hit-idx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-hit-idx'));
+          if (state.links[idx]) {
+            state.links[idx].hits += 1;
+            saveState();
+            renderLoggerLinks();
+            syncAllUI();
+            SoundEngine.tick();
+            showToast(`Хит зафиксирован: /${state.links[idx].slug}`);
+          }
+        });
+      });
+
+      box.querySelectorAll('[data-del-idx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-del-idx'));
+          state.links.splice(idx, 1);
+          saveState();
+          renderLoggerLinks();
+          syncAllUI();
+          SoundEngine.tick();
+          showToast('Ловушка удалена');
+        });
+      });
+    }
+
+    document.getElementById('createTrapBtn').addEventListener('click', () => {
+      const pro = isProActive();
+      if (!pro && state.links.length >= 5) {
+        showToast('Лимит 5 ловушек! Активируйте PRO во вкладке «Подписка»');
+        return;
+      }
+
+      const title = document.getElementById('trapTitleInput').value.trim();
+      if (!title) {
+        showToast('Введите заголовок или ник цели');
+        return;
+      }
+
+      const slug = generateSlug(pro ? 10 : 8);
+      const newItem = {
+        slug,
+        title: title.slice(0, 64),
+        tpl: TPL_LABELS[state.selectedTemplate] || 'Dox',
+        hits: 0,
+        createdAt: Date.now()
+      };
+
+      state.links.unshift(newItem);
+      document.getElementById('trapTitleInput').value = '';
+      document.getElementById('trapImgInput').value = '';
+      saveState();
+      renderLoggerLinks();
+      syncAllUI();
+      SoundEngine.pop();
+      copyToClipboard(buildFullTrapUrl(newItem), `Ссылка /${slug} создана и скопирована!`);
+    });
+
+    async function runDiagnostics() {
+      document.getElementById('diagIp').textContent = 'Запрос...';
+      document.getElementById('diagScreen').textContent = `${screen.width}x${screen.height}x${screen.colorDepth}`;
+      document.getElementById('diagCpu').textContent = `Ядра: ${navigator.hardwareConcurrency || '—'} | ${navigator.platform || 'Client'}`;
+      document.getElementById('diagTz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      document.getElementById('diagUa').textContent = navigator.userAgent;
+
+      try {
+        const res = await fetch('https://ipwho.is/');
+        const data = await res.json();
+        if (data && data.success) {
+          document.getElementById('diagIp').textContent = data.ip;
+          document.getElementById('diagIsp').textContent = `${data.connection?.isp || 'ISP'} (AS${data.connection?.asn || '—'})`;
+          document.getElementById('diagGeo').textContent = `${data.country}, ${data.city}`;
+        } else {
+          throw new Error('fallback');
+        }
+      } catch (e) {
+        try {
+          const r2 = await fetch('https://api.ipify.org?format=json');
+          const d2 = await r2.json();
+          document.getElementById('diagIp').textContent = d2.ip || 'Недоступно';
+          document.getElementById('diagIsp').textContent = 'IPv4 активен';
+          document.getElementById('diagGeo').textContent = 'GeoIP недоступен';
+        } catch (err) {
+          document.getElementById('diagIp').textContent = 'Нет сети';
+        }
+      }
+
+      // WebRTC mDNS Check
+      try {
+        if (!window.RTCPeerConnection) {
+          document.getElementById('diagWebRtc').textContent = 'Отключён';
+          document.getElementById('diagWebRtcHint').textContent = 'Утечка невозможна';
+        } else {
+          const pc = new RTCPeerConnection({ iceServers: [] });
+          pc.createDataChannel('check');
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+
+          let status = 'mDNS Защита (.local)';
+          let hint = 'Локальный IP замаскирован';
+
+          await new Promise(resolve => {
+            const t = setTimeout(() => { pc.close(); resolve(); }, 800);
+            pc.onicecandidate = (ev) => {
+              if (!ev || !ev.candidate) {
+                clearTimeout(t);
+                pc.close();
+                resolve();
+                return;
+              }
+              const cStr = ev.candidate.candidate || '';
+              if (cStr.includes('.local')) {
+                status = 'mDNS UUID (.local)';
+                hint = 'Браузер скрывает локальный IP';
+              } else {
+                const match = cStr.match(/(\d{1,3}\.){3}\d{1,3}/);
+                if (match) {
+                  status = match[0];
+                  hint = 'Обнаружен ICE-адрес';
+                }
+              }
+            };
+          });
+
+          document.getElementById('diagWebRtc').textContent = status;
+          document.getElementById('diagWebRtcHint').textContent = hint;
+        }
+      } catch (e) {
+        document.getElementById('diagWebRtc').textContent = 'Ограничено';
+      }
+    }
+
+    document.getElementById('refreshDiagBtn').addEventListener('click', () => {
+      SoundEngine.tick();
+      runDiagnostics();
+      showToast('Телеметрия обновлена');
+    });
+
+    document.getElementById('copyDiagBtn').addEventListener('click', () => {
+      const txt = [
+        `IP: ${document.getElementById('diagIp').textContent}`,
+        `ISP: ${document.getElementById('diagIsp').textContent}`,
+        `Гео: ${document.getElementById('diagGeo').textContent}`,
+        `WebRTC: ${document.getElementById('diagWebRtc').textContent}`,
+        `Экран: ${document.getElementById('diagScreen').textContent}`,
+        `UA: ${document.getElementById('diagUa').textContent}`
+      ].join('\n');
+      copyToClipboard(txt);
+    });
+
+    // =========================================================================
+    // 8. SUBSCRIPTION & TARIFFS
+    // =========================================================================
+    const paySourceMain = document.getElementById('paySourceMain');
+    const paySourceRef = document.getElementById('paySourceRef');
+
+    function updateTariffPrices() {
+      const markup = state.paySource === 'ref' ? 0.50 : 0;
+      document.querySelectorAll('[data-plan-price]').forEach(el => {
+        const base = parseFloat(el.getAttribute('data-plan-price'));
+        el.textContent = `${(base + markup).toFixed(2)}$`;
+      });
+
+      if (state.paySource === 'main') {
+        paySourceMain.className = 'tactile-btn flex-1 py-2 px-3 rounded-xl bg-white text-black font-bold';
+        paySourceRef.className = 'tactile-btn flex-1 py-2 px-3 rounded-xl bg-transparent text-neutral-400 hover:text-white font-semibold';
+      } else {
+        paySourceRef.className = 'tactile-btn flex-1 py-2 px-3 rounded-xl bg-white text-black font-bold';
+        paySourceMain.className = 'tactile-btn flex-1 py-2 px-3 rounded-xl bg-transparent text-neutral-400 hover:text-white font-semibold';
+      }
+    }
+
+    paySourceMain.addEventListener('click', () => {
+      state.paySource = 'main';
+      SoundEngine.tick();
+      updateTariffPrices();
+    });
+
+    paySourceRef.addEventListener('click', () => {
+      state.paySource = 'ref';
+      SoundEngine.tick();
+      updateTariffPrices();
+    });
+
+    document.getElementById('quickTopupBtn').addEventListener('click', () => {
+      state.balance = Number((state.balance + 5.0).toFixed(2));
+      saveState();
+      syncAllUI();
+      SoundEngine.pop();
+      showToast('Баланс пополнен на +5.00$');
+    });
+
+    document.querySelectorAll('.buy-tariff-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const base = parseFloat(btn.getAttribute('data-base-price'));
+        const sec = parseInt(btn.getAttribute('data-buy-sec'), 10);
+        const markup = state.paySource === 'ref' ? 0.50 : 0;
+        const total = Number((base + markup).toFixed(2));
+
+        if (state.paySource === 'main') {
+          if (state.balance < total) {
+            showToast('Недостаточно средств! Нажмите «+5.00$ Пополнить»');
+            return;
+          }
+          state.balance = Number((state.balance - total).toFixed(2));
+        } else {
+          if (state.refBalance < total) {
+            showToast('Недостаточно средств на реф. балансе');
+            return;
+          }
+          state.refBalance = Number((state.refBalance - total).toFixed(2));
+        }
+
+        const startFrom = Math.max(Date.now(), state.premiumUntil);
+        state.premiumUntil = startFrom + sec * 1000;
+        saveState();
+        syncAllUI();
+        SoundEngine.pop();
+        showToast('✦ Подписка STAR // NOIR PRO активирована!');
+      });
+    });
+
+    // =========================================================================
+    // 9. CABINET & SYSTEM SETTINGS
+    // =========================================================================
+    document.getElementById('copyCabRefBtn').addEventListener('click', () => {
+      copyToClipboard(document.getElementById('cabRefUrl').value);
+    });
+
+    const setDefaultThinkToggle = document.getElementById('setDefaultThinkToggle');
+    const setAnonToggle = document.getElementById('setAnonToggle');
+    const setSoundToggle = document.getElementById('setSoundToggle');
+    const setAnimSpeedSelect = document.getElementById('setAnimSpeedSelect');
+
+    setDefaultThinkToggle.addEventListener('change', (e) => {
+      state.settings.defaultThink = e.target.checked;
+      if (state.settings.defaultThink) {
+        state.selectedModel = 'deep_think';
+        modelSelect.value = 'deep_think';
+        updateComposerPlaceholder();
+      }
+      saveState();
+      SoundEngine.tick();
+    });
+
+    setAnonToggle.addEventListener('change', (e) => {
+      if (e.target.checked && !isProActive()) {
+        e.target.checked = false;
+        showToast('Анонимность доступна только с подпиской PRO');
+        return;
+      }
+      state.settings.anon = e.target.checked;
+      saveState();
+      renderLoggerLinks();
+      SoundEngine.tick();
+      showToast(state.settings.anon ? 'Анонимность включена' : 'Анонимность выключена');
+    });
+
+    setSoundToggle.addEventListener('change', (e) => {
+      state.settings.sound = e.target.checked;
+      saveState();
+      if (state.settings.sound) SoundEngine.tick();
+    });
+
+    setAnimSpeedSelect.addEventListener('change', (e) => {
+      state.settings.animSpeed = e.target.value;
+      applyAnimationClass();
+      saveState();
+      SoundEngine.tick();
+    });
+
+    function applyAnimationClass() {
+      document.body.classList.remove('anim-fast', 'anim-off');
+      if (state.settings.animSpeed === 'fast') document.body.classList.add('anim-fast');
+      if (state.settings.animSpeed === 'off') document.body.classList.add('anim-off');
+    }
+
+    document.getElementById('resetAllDataBtn').addEventListener('click', () => {
+      localStorage.removeItem(STORE_KEY);
+      location.reload();
+    });
+
+    // =========================================================================
+    // 10. GLOBAL UI SYNCHRONIZATION & DIGITAL TIMER
+    // =========================================================================
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function syncAllUI() {
+      const pro = isProActive();
+      const maxAi = pro ? 15 : 5;
+      const aiLeft = Math.max(0, maxAi - state.aiUsedToday);
+
+      // Header
+      document.getElementById('topBalanceValue').textContent = `${state.balance.toFixed(2)}$`;
+      document.getElementById('topQuotaValue').textContent = `${aiLeft}/${maxAi}`;
+      document.getElementById('headerProTag').classList.toggle('hidden', !pro);
+
+      // Subscription Tab
+      document.getElementById('srcMainBal').textContent = `${state.balance.toFixed(2)}$`;
+      document.getElementById('srcRefBal').textContent = `${state.refBalance.toFixed(2)}$`;
+      const subPill = document.getElementById('subStatusPill');
+      const subTimer = document.getElementById('subDigitalTimer');
+      const subLabel = document.getElementById('subCountdownLabel');
+
+      if (pro) {
+        subPill.textContent = '✦ PRO АКТИВЕН';
+        subPill.className = 'text-[10px] font-mono font-extrabold uppercase px-2.5 py-1 rounded-full bg-white text-black';
+        const diff = Math.max(0, Math.floor((state.premiumUntil - Date.now()) / 1000));
+        const d = Math.floor(diff / 86400);
+        const h = Math.floor((diff % 86400) / 3600);
+        const m = Math.floor((diff % 3600) / 60);
+        const s = diff % 60;
+        subTimer.textContent = `${pad2(d)}Д : ${pad2(h)}Ч : ${pad2(m)}М : ${pad2(s)}С`;
+        subLabel.textContent = 'Активен расширенный лимит: 15 AI-запросов/день и безлимит ловушек';
+      } else {
+        subPill.textContent = 'БАЗОВЫЙ ДОСТУП';
+        subPill.className = 'text-[10px] font-mono font-extrabold uppercase px-2.5 py-1 rounded-full bg-black text-neutral-300 border border-white/20';
+        subTimer.textContent = '00Д : 00Ч : 00М : 00С';
+        subLabel.textContent = 'Базовый лимит: 5 AI-запросов/день, 5 ловушек';
+      }
+
+      // Cabinet Tab
+      document.getElementById('cabBalText').textContent = `${state.balance.toFixed(2)}$`;
+      document.getElementById('cabRefText').textContent = `${state.refBalance.toFixed(2)}$`;
+      const cabBadge = document.getElementById('cabRoleBadge');
+      cabBadge.textContent = pro ? 'PRO' : 'USER';
+      cabBadge.className = pro
+        ? 'text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-white text-black'
+        : 'text-[10px] font-mono px-2 py-0.5 rounded bg-black border border-white/20 text-neutral-300';
+
+      const totalHits = state.links.reduce((acc, l) => acc + (l.hits || 0), 0);
+      document.getElementById('statLinksCount').textContent = state.links.length;
+      document.getElementById('statHitsCount').textContent = totalHits;
+      document.getElementById('statAiCount').textContent = state.chatHistory.filter(m => m.role === 'user').length;
+
+      // Settings Controls
+      setDefaultThinkToggle.checked = state.settings.defaultThink;
+      setAnonToggle.checked = pro && state.settings.anon;
+      setSoundToggle.checked = state.settings.sound;
+      setAnimSpeedSelect.value = state.settings.animSpeed;
+      applyAnimationClass();
+
+      updateTariffPrices();
+      renderLoggerLinks();
+    }
+
+    window.onload = function () {
+      loadState();
+      modelSelect.value = state.selectedModel;
+      updateComposerPlaceholder();
+      renderChat();
+      syncAllUI();
+      runDiagnostics();
+
+      setInterval(() => {
+        if (isProActive()) {
+          syncAllUI();
+        }
+      }, 1000);
+    };
+  </script>
+</body>
+</html>
